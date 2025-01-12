@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KSL Webcam Feed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" >
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+     <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        margin: -10px;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: url('static/images/hd.png') no-repeat center center;
+        background-size: cover;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+      #translation{
+      font-weight: 500;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 25px;
+      margin-left: -70%;
+      margin-bottom: 10px;
+
+    }
+      #container {
+        width: 90%;
+        width: 500px;
+        height: 375px;
+        aspect-ratio: 4 / 3;
+        border: 5px solid #333;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+
+      #videoElement {
+        width: 100%;
+        max-width: 500px;
+        height: 375px;
+        background-color: gainsboro;
+        object-fit: contain;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .controls button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        border: none;
+        border-radius: 50%;
+        background-color: #333;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .controls button:hover {
+        background-color: #555;
+      }
+
+      .controls button#endFeed {
+        background-color: #d9534f;
+      }
+
+      .controls button#endFeed:hover {
+        background-color: #c9302c;
+      }
+
+      .controls button img {
+        width: 28px;
+        height: 28px;
+      }
+    </style> 
+  </head>
+  <body>
+
+    {% include 'navbar_private.html' %}
+
+
+     <h1>Webcam Feed</h1>
+     <div id="container">
+
+      <img src="{{ url_for('video') }}" id="videoElement">
+     </div>
+     
+
+    <div class="controls">
+      <button id="toggle">
+        <img src="{{url_for('static', filename='images/video.png')}}" alt="Toggle Camera" id="cameraIcon" />
+      </button>
+      <button id="endFeed">
+        <img src="{{url_for('static', filename='images/phone.png')}}" alt="End Feed" />
+      </button>
+    </div>
+
+    <div id="translation">No gesture detected</div>
+
+
+    <script>
+      const videoElement = document.querySelector("#videoElement");
+      const translationElement=document.getElementById("translation");
+      let toggleButton = document.querySelector("#toggle");
+      let endButton = document.querySelector("#endFeed");
+      let cameraIcon = document.querySelector("#cameraIcon");
+
+      let isCameraOn = false;
+      let translationInt;
+      
+          function startCamera() {
+          fetch('/video') // Initiate video streaming
+            .then(response => {
+              if (response.ok) {
+                videoElement.src = "{{ url_for('video') }}"; // Set the video feed source
+                isCameraOn = true;
+                cameraIcon.src = "{{ url_for('static', filename='images/video.png') }}";
+                console.log("Camera started.");
+                startTranslation();
+              } else {
+                console.error("Failed to start camera.");
+              }
+            })
+            .catch(error => console.error("Error starting camera:", error));
+        }
+      
+    function stopCamera(){
+    fetch('/stop_camera')
+    .then(response => {
+      if (response.ok) {
+        videoElement.src = "{{ url_for('static', filename='images/camera.png') }}"; // Clear the video feed source
+        isCameraOn = false;
+        cameraIcon.src = "{{ url_for('static', filename='images/no-video.png') }}";
+        console.log("Camera stopped.");
+        stopTranslation();
+      } else {
+        console.error("Failed to stop the camera.");
+      }
+    })
+    .catch(error => console.error("Error stopping camera:", error));
+  }
+   function startTranslation(){
+    translationInt = setInterval(getTranslation,2000);
+   }
+   function stopTranslation(){
+    clearInterval(translationInt);
+    translationElement.textContent = 'No gesture detected';
+   }
+
+      // Toggle Button Click Event
+      toggleButton.addEventListener("click", () => {
+        if (isCameraOn) {
+          stopCamera();
+        } else {
+          startCamera();
+        }
+      });
+
+      // End Feed Button Click Event
+      endButton.addEventListener("click", () => {
+        if (isCameraOn) {
+          stopCamera();
+        }
+        alert("Webcam feed ended.");
+        window.location.href = "{{ url_for('home') }}"; // Redirect to homepage
+      });
+
+
+      function getTranslation(){
+        $.getJSON('/translation', function(data){
+          $('#translation').text("Translated text: "+  data.translation);
+        });
+      }
+
+      stopCamera();
+    </script> 
+  </body>
+</html>

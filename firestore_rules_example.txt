@@ -1,0 +1,13 @@
+// This firestore rule will deny any read, write access to the database from any client.
+// The server will be able to read and write to the database through the Firebase Admin SDK
+// Copy and paste security rules into "Rules" section of your Cloud Firestore project
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,18 @@
+<div class="navbar">
+    <img class="logo-img" src="{{ url_for('static', filename='images/logo.png') }}" />
+    <div class="navbar-right" id="navbarRight">
+
+        {% if session['user'] %}
+        <div id="greeting">
+            <img class="user-img" src="{{url_for('static', filename='images/user.png')}}"alt="user">
+            Welcome, {{ session['user']['username'] }}!
+        </div>
+        <a id="sign-out-btn" href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('login') }}">Login</a>
+       
+        {% endif %}
+        
+    </div>
+</div>

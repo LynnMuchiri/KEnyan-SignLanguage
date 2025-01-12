@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" >
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+  <title>KSL</title>
+  </head>
+  <body>
+
+    {% include 'navbar_public.html' %}
+
+      <section class="hero">
+          <div class="hero-text">
+              <h5 data-aos="fade-right" data-aos-duration="1400">#Every Gesture Speaks Volume</h5>
+              <h1 data-aos="zoom-in-left" data-aos-duration="1400" data-aos-delay="200">Kenya Sign Language</h1>
+              <p data-aos="fade-right" data-aos-duration="1400" data-aos-delay="300">Sign Language is a dance with words, to be enjoyed 
+                  from babyhood through childhood to adulthood
+              </p>
+
+              <div class="main-hero">
+                  <a href="{{ url_for('dashboard') }}" class="btn" data-aos="fade-right" data-aos-duration="1400">Try it now</a>
+              </div>
+         </div>
+         
+          <div class="hero-img" data-aos="zoom-in" data-aos-duration="1400">
+              <img src="static/images/sl.jpeg">
+          </div>
+      </section>
+      <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+      <script>
+        AOS.init();
+      </script>
+
+      
+
+  <script src="{{ url_for('static', filename='login-auth.js') }}" type="module"></script>
+  <script src="{{ url_for('static', filename='scripts.js') }}" type="module"></script>
+
+  </body>
+  
+</html>

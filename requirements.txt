@@ -3,3 +3,4 @@ firebase_admin
 gunicorn
 python-dotenv
 opencv-python
+huggingface_hub

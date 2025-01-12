@@ -40,6 +40,9 @@ translation_txt = "No gesture detected"
 def generate_frames():
     global translation_txt
     global camera
+    conf_threshold = 0.5
+
+
     if camera is None or not camera.isOpened():
         camera = cv2.VideoCapture(0)
 
@@ -53,15 +56,23 @@ def generate_frames():
         results=model.predict(source=frame,save=False,show=False)
 
         translation_txt = "No gesture detected"
+        # for result in results:
+        #     for box in result.boxes.xyxy:
+        #         x1, y1, x2, y2 = [int(coord) for coord in box[:4]]
+        #         cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 2)
+        #         label = result.names[int(result.boxes.cls[0])]
+        #         cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
+            
         for result in results:
-            for box in result.boxes.xyxy:
-                x1, y1, x2, y2 = [int(coord) for coord in box[:4]]
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 2)
-                label = result.names[int(result.boxes.cls[0])]
-                cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
+            for box, conf in zip(result.boxes.xyxy, result.boxes.conf):
+                if conf >= conf_threshold:  # Only process if confidence exceeds threshold
+                    x1, y1, x2, y2 = [int(coord) for coord in box[:4]]
+                    label = result.names[int(result.boxes.cls[0])]
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 2)
+                    cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
 
 
-                translation_txt = label
+                    translation_txt = label
 
             ret,buffer=cv2.imencode('.jpg',frame)
             frame_bytes=buffer.tobytes()
@@ -196,4 +207,3 @@ def stop_camera():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    # app.run(ssl_context=('cert.pem', 'key.pem'), host="127.0.0.1", port=5000)

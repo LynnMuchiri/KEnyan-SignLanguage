@@ -80,27 +80,7 @@ def generate_frames():
 
             yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-            
-def detect_sign(image):
-    results = model.predict(source=np.array(image), save=False)
-    translation_txt = "No gesture detected"
-
-    for result in results:
-        for box, conf in zip(result.boxes.xyxy, result.boxex.conf):
-            if conf>=0.5:
-                label = result.names[int(result.boxes.cls[0])]
-                translation_txt = label
-                break
-            return f'Detected Sign: {translation_txt}' 
-
-interface = gr.Interface(
-    fn =detect_sign,
-    inputs=gr.Image(type='pil'),
-     outputs = 'text',
-    live = True,
-    title = 'Gesture Translator'
-            
-        )           
+               
             
         
 
@@ -227,9 +207,6 @@ def stop_camera():
     print("Camera stopped successfully.")
     return 'Camera Stopped', 200
 
-@app.route('/gradio_interface')
-def launch_gradio():
-    return interface.launch(share=True)
 
 if __name__ == '__main__':
     app.run(debug=True)

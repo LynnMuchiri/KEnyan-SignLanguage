@@ -17,7 +17,9 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
+
 camera=None
+conf_threshold = 0.5
 
 model = YOLO('best.pt')
 
@@ -40,7 +42,6 @@ translation_txt = "No gesture detected"
 def generate_frames():
     global translation_txt
     global camera
-    conf_threshold = 0.5
 
 
     if camera is None or not camera.isOpened():
@@ -80,6 +81,26 @@ def generate_frames():
             yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
             
+def detect_sign(image):
+    results = model.predict(source=np.array(image), save=False)
+    translation_txt = "No gesture detected"
+
+    for result in results:
+        for box, conf in zip(result.boxes.xyxy, result.boxex.conf):
+            if conf>=0.5:
+                label = result.names[int(result.boxes.cls[0])]
+                translation_txt = label
+                break
+            return f'Detected Sign: {translation_txt}' 
+
+interface = gr.Interface(
+    fn =detect_sign,
+    inputs=gr.Image(type='pil'),
+     outputs = 'text',
+    live = True,
+    title = 'Gesture Translator'
+            
+        )           
             
         
 
@@ -200,11 +221,15 @@ def get_translation():
 @app.route('/stop_camera')
 def stop_camera():
     global camera
-    camera.release()
-    camera = None
+    if camera is not None and camera.isOpened():
+        camera.release()
+    # camera = None
     print("Camera stopped successfully.")
     return 'Camera Stopped', 200
 
+@app.route('/gradio_interface')
+def launch_gradio():
+    return interface.launch(share=True)
+
 if __name__ == '__main__':
-     app.run(debug=True, host='0.0.0.0', port=int(os.getenv("PORT", 5000)))
-    # app.run(debug=True)
+    app.run(debug=True)
